@@ -26,24 +26,10 @@ const App = () => {
     { name: "male", value: "male" },
     { name: "female", value: "female" },
   ];
-  const [persons, setPersons] = useState([
-    {
-      id: 1,
-      name: "Jose",
-      lastname: "Alvarez",
-      gender: "male",
-      address: "Av. Don Bosco",
-      birthday: "1994-03-18",
-    },
-    {
-      id: 2,
-      name: "Juan",
-      lastname: "Antonio",
-      gender: "male",
-      address: "Calle Guayas",
-      birthday: "1989-08-26",
-    },
-  ]);
+  const [persons, setPersons] = useState(
+    JSON.parse(localStorage.getItem("persons"))
+  );
+
   const resetForm = () => {
     setInput({
       id: "",
@@ -60,9 +46,11 @@ const App = () => {
     setInput(data);
   };
   const handleModalDelete = (data) => {
-    setShowModalDelete(!showModalDelete);
-    setPersonSelect(data.id);
-    setPersonSelectName(data.name);
+    if (data) {
+      setShowModalDelete(!showModalDelete);
+      setPersonSelect(data.id);
+      setPersonSelectName(data.name);
+    }
   };
   const handleModalEdit = (type, data) => {
     setShowModal(!showModal);
@@ -73,41 +61,76 @@ const App = () => {
     CONDITION[type]();
   };
   const editPerson = async () => {
-    console.log(
-      ...persons.splice(input.id - 1, 1, {
-        id: input.id,
-        name: input.name,
-        lastname: input.lastname,
-        gender: input.gender,
-        address: input.address,
-        birthday: input.birthday,
-      })
-    );
+    console.log(persons);
+    persons.splice(input.id - 1, 1, {
+      id: input.id,
+      name: input.name,
+      lastname: input.lastname,
+      gender: input.gender,
+      address: input.address,
+      birthday: input.birthday,
+    });
+
+    localStorage.setItem("persons", JSON.stringify(persons));
     handleModalEdit("reset");
   };
 
   const deletePerson = (item) => {
     let newList = persons.filter((e) => e.id !== personSelect);
-    console.log(newList);
     setPersons(newList);
     setShowModalDelete(!showModalDelete);
+    localStorage.setItem("persons", JSON.stringify(newList));
+
     setPersonSelect("");
   };
 
   const addPerson = async () => {
-    let newId = persons.length + 1;
-    setPersons([
-      ...persons,
-      {
-        id: newId,
-        name: input.name,
-        lastname: input.lastname,
-        gender: input.gender,
-        address: input.address,
-        birthday: input.birthday,
-      },
-    ]);
     handleModalEdit("reset");
+    const localPersons = localStorage.getItem("persons");
+    if (localPersons) {
+      let newId = persons.length + 1;
+      const arrayPerson = [
+        ...persons,
+        {
+          id: newId,
+          name: input.name,
+          lastname: input.lastname,
+          gender: input.gender,
+          address: input.address,
+          birthday: input.birthday,
+        },
+      ];
+      setPersons(arrayPerson);
+      localStorage.setItem("persons", JSON.stringify(arrayPerson));
+    } else {
+      const arrayPerson = [
+        {
+          id: 1,
+          name: input.name,
+          lastname: input.lastname,
+          gender: input.gender,
+          address: input.address,
+          birthday: input.birthday,
+        },
+      ];
+
+      setPersons(arrayPerson);
+      localStorage.setItem("persons", JSON.stringify(arrayPerson));
+    }
+
+    // localStorage.setItem("persons", JSON.stringify(persons));
+    // let newId = persons.length + 1;
+    // setPersons([
+    //   ...persons,
+    //   {
+    //     id: newId,
+    //     name: input.name,
+    //     lastname: input.lastname,
+    //     gender: input.gender,
+    //     address: input.address,
+    //     birthday: input.birthday,
+    //   },
+    // ]);
   };
 
   const handleInputChange = (e) => {
@@ -147,10 +170,10 @@ const App = () => {
 
         <ModalDelete
           show={showModalDelete}
-          onHide={() => handleModalDelete()}
+          onHide={() => handleModalDelete("reset")}
           personSelectName={personSelectName}
           onClick={handleModalDelete}
-          onClick2={() => deletePerson()}
+          onEjecute={() => deletePerson()}
         ></ModalDelete>
 
         <div className="container">
@@ -167,7 +190,7 @@ const App = () => {
               </tr>
             </thead>
             <tbody>
-              {persons.map((item) => {
+              {persons?.map((item) => {
                 return (
                   <tr key={item.id}>
                     <td>{item.id}</td>

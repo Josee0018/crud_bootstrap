@@ -2,7 +2,7 @@ import React from "react";
 import { Modal, Button } from "react-bootstrap";
 
 const ModalDelete = (props) => {
-  const { show, onHide, onClick, onClick2, personSelectName } = props;
+  const { show, onHide, onClick, onEjecute, personSelectName } = props;
 
   return (
     <Modal id="modal_delete" show={show} onHide={onHide}>
@@ -17,7 +17,7 @@ const ModalDelete = (props) => {
         <Button variant="secondary" onClick={onClick}>
           Close
         </Button>
-        <Button variant="primary" onClick={onClick2}>
+        <Button variant="primary" onClick={onEjecute}>
           Confirm
         </Button>
       </Modal.Footer>
