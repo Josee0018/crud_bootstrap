@@ -4,11 +4,18 @@ import ButtonB from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modalinput from "./components/Modalinput";
 import ModalDelete from "./components/ModalDelete";
+import { useDispatch, useSelector } from "react-redux";
+import { getPersons } from "./redux/actions/person/person.actions";
+import TitleHeader from "./components/TitleHeader";
 
 const App = () => {
+  const dispatch = useDispatch();
+  const { list, isLoadingList, errorList } = useSelector(
+    ({ personReducer }) => personReducer
+  );
   const [showModal, setShowModal] = useState(false);
   const [personSelect, setPersonSelect] = useState("");
   const [personSelectName, setPersonSelectName] = useState("");
@@ -27,9 +34,20 @@ const App = () => {
     { name: "female", value: "female" },
   ];
   const [persons, setPersons] = useState(
-    JSON.parse(localStorage.getItem("persons"))
+    // JSON.parse(localStorage.getItem("persons"))
+    null
   );
 
+  useEffect(() => {
+    dispatch(getPersons());
+    //eslint-disable-next-line
+  }, []);
+  useEffect(() => {
+    if (list !== null && persons === null) {
+      setPersons(list);
+    }
+    //eslint-disable-next-line
+  }, [list]);
   const resetForm = () => {
     setInput({
       id: "",
@@ -61,7 +79,6 @@ const App = () => {
     CONDITION[type]();
   };
   const editPerson = async () => {
-    console.log(persons);
     persons.splice(input.id - 1, 1, {
       id: input.id,
       name: input.name,
@@ -117,20 +134,6 @@ const App = () => {
       setPersons(arrayPerson);
       localStorage.setItem("persons", JSON.stringify(arrayPerson));
     }
-
-    // localStorage.setItem("persons", JSON.stringify(persons));
-    // let newId = persons.length + 1;
-    // setPersons([
-    //   ...persons,
-    //   {
-    //     id: newId,
-    //     name: input.name,
-    //     lastname: input.lastname,
-    //     gender: input.gender,
-    //     address: input.address,
-    //     birthday: input.birthday,
-    //   },
-    // ]);
   };
 
   const handleInputChange = (e) => {
@@ -139,16 +142,16 @@ const App = () => {
       [e.target.name]: e.target.value,
     });
   };
-
+  if (isLoadingList) {
+    return "loading";
+  }
+  if (errorList) {
+    return "error";
+  }
   return (
     <>
       <div className="container">
-        <div className="container">
-          <h2>
-            Ajax CRUD with bootstrap modals and Datatables with Bulk Delete
-          </h2>
-          <h2>Person Data</h2>
-        </div>
+        <TitleHeader />
         <ButtonB
           variant="success"
           onClick={() => handleModalEdit("reset")}
